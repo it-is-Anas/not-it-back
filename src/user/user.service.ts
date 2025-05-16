@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LogInUserDto } from './dto/log-in.dto';
+
+import { Response } from '../GLobal/Response';
 
 @Injectable()
 export class UserService {
@@ -15,17 +16,10 @@ export class UserService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
-
-  async findAll(): Promise<User[]> {
-    const users = await this.usersRepository.find();
-    return users;
-  }
-
-  async register(body: CreateUserDto) {
+  async register(body: CreateUserDto): Promise<Response> {
     const { firstName, lastName, email, password } = body;
-    // bcrypt.
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await this.usersRepository.create({
+    const user = this.usersRepository.create({
       firstName,
       lastName,
       email,
@@ -35,14 +29,14 @@ export class UserService {
     const payload = { sub: user.id, email: user.email };
     const access_token = await this.jwtService.signAsync(payload);
     return {
-      msg: 'User register',
-      user,
+      message: 'User register',
+      data: user,
       status: 201,
       access_token,
     };
   }
 
-  async logIn(body: LogInUserDto) {
+  async logIn(body: LogInUserDto): Promise<Response> {
     const user = await this.usersRepository.findOne({
       where: { email: body.email },
     });
@@ -52,8 +46,8 @@ export class UserService {
         const payload = { sub: user.id, email: user.email };
         const access_token = await this.jwtService.signAsync(payload);
         return {
-          msg: 'Welcome Back',
-          user,
+          message: 'Welcome Back',
+          data: user,
           status: 200,
           access_token,
         };
@@ -64,5 +58,13 @@ export class UserService {
       );
     }
     throw new HttpException('EMAIL NOT FOUND', HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+  async findAll(): Promise<Response> {
+    const users = await this.usersRepository.find();
+    return {
+      data: users,
+      message: 'All USERS',
+      status: 200,
+    };
   }
 }
