@@ -42,11 +42,13 @@ export class UserService {
     };
   }
 
-  async logIn(body:LogInUserDto){
-    const user = await this.usersRepository.findOne({where:{email: body.email}});
-    if(user){
+  async logIn(body: LogInUserDto) {
+    const user = await this.usersRepository.findOne({
+      where: { email: body.email },
+    });
+    if (user) {
       const isMatch = await bcrypt.compare(body.password, user?.password);
-      if(isMatch){
+      if (isMatch) {
         const payload = { sub: user.id, email: user.email };
         const access_token = await this.jwtService.signAsync(payload);
         return {
@@ -56,7 +58,10 @@ export class UserService {
           access_token,
         };
       }
-      throw new HttpException('EMAIL AND PASSWORD NOT MATCH', HttpStatus.UNPROCESSABLE_ENTITY);
+      throw new HttpException(
+        'EMAIL AND PASSWORD NOT MATCH',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
     }
     throw new HttpException('EMAIL NOT FOUND', HttpStatus.UNPROCESSABLE_ENTITY);
   }
