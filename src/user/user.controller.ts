@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { LogInUserDto } from './dto/log-in.dto';
 
-import { Response } from '../GLobal/Response';
+import { Response } from '../Types/Response';
 
 @Controller('')
 export class UserController {

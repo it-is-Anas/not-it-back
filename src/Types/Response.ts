@@ -1,6 +1,6 @@
 export class Response {
   message: string;
-  data: object | object[];
   status: number;
+  data?: object | object[];
   access_token?: string;
 }
