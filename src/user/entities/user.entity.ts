@@ -1,5 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Note } from 'src/note/entities/note.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -19,4 +19,7 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => Note, (note) => note.user) // Define the relationship
+  notes: Note[];
 }
