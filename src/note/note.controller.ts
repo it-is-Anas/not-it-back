@@ -34,12 +34,13 @@ export class NoteController {
   updateNote(
     @Param('id') id: number,
     @Body() body: CreateNoteDto,
+    @Req() req: Request,
   ): Promise<Response> {
-    return this.noteService.updateNote(id, body);
+    return this.noteService.updateNote(id, body, req.user);
   }
 
   @Delete(':id')
-  deleteNote(@Param('id') id: number): Promise<Response> {
-    return this.noteService.deleteNote(id);
+  deleteNote(@Param('id') id: number, @Req() req: Request): Promise<Response> {
+    return this.noteService.deleteNote(id, req.user);
   }
 }

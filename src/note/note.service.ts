@@ -38,11 +38,21 @@ export class NoteService {
     };
   }
 
-  async updateNote(id: number, body: CreateNoteDto): Promise<Response> {
-    const note = await this.noteRepository.findOne({ where: { id } });
+  async updateNote(id: number, body: CreateNoteDto, user): Promise<Response> {
+    const note = await this.noteRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!note) {
       throw new Error(`Note with id ${id} not found`);
     }
+    if (note.user.id !== user.id) {
+      return {
+        message: "Sorry You don't have perrmisione to this note",
+        status: 403,
+      };
+    }
+
     if (body.title !== undefined) note.title = body.title;
     if (body.content !== undefined) note.content = body.content;
     await this.noteRepository.save(note);
@@ -53,11 +63,19 @@ export class NoteService {
     };
   }
 
-  async deleteNote(id): Promise<Response> {
-    const note = await this.noteRepository.findOne({ where: { id } });
-
+  async deleteNote(id, user): Promise<Response> {
+    const note = await this.noteRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!note) {
       throw new Error(`Note with id ${id} not found`);
+    }
+    if (note.user.id !== user.id) {
+      return {
+        message: "Sorry You don't have perrmisione to this note",
+        status: 403,
+      };
     }
 
     const deletedNote = await this.noteRepository.remove(note);
