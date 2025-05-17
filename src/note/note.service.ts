@@ -3,6 +3,7 @@ import { Note } from './entities/note.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from '../Types/Response';
+import { CreateNoteDto } from './dto/create-note.dto';
 
 @Injectable()
 export class NoteService {
@@ -10,7 +11,7 @@ export class NoteService {
     @InjectRepository(Note) private noteRepository: Repository<Note>,
   ) {}
 
-  async createNote(body, user): Promise<Response> {
+  async createNote(body: CreateNoteDto, user): Promise<Response> {
     const id = user.id;
     const note = this.noteRepository.create({
       title: body.title,
@@ -34,6 +35,37 @@ export class NoteService {
       data: notes,
       status: 200,
       message: 'Your Notes!',
+    };
+  }
+
+  async updateNote(id: number, body: CreateNoteDto): Promise<Response> {
+    const note = await this.noteRepository.findOne({ where: { id } });
+    if (!note) {
+      throw new Error(`Note with id ${id} not found`);
+    }
+    if (body.title !== undefined) note.title = body.title;
+    if (body.content !== undefined) note.content = body.content;
+    await this.noteRepository.save(note);
+    return {
+      message: 'Updated successfull!',
+      data: note,
+      status: 201,
+    };
+  }
+
+  async deleteNote(id): Promise<Response> {
+    const note = await this.noteRepository.findOne({ where: { id } });
+
+    if (!note) {
+      throw new Error(`Note with id ${id} not found`);
+    }
+
+    const deletedNote = await this.noteRepository.remove(note);
+
+    return {
+      message: 'Note Has been deleted !',
+      data: deletedNote,
+      status: 201,
     };
   }
 }
