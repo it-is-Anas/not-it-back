@@ -18,16 +18,45 @@ export class UserService {
   ) {}
   async register(body: CreateUserDto): Promise<Response> {
     const { firstName, lastName, email, password } = body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    let hashedPassword;
+    try {
+      hashedPassword = await bcrypt.hash(password, 10);
+    } catch (error) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
+    if (!hashedPassword) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     const user = this.usersRepository.create({
       firstName,
       lastName,
       email,
       password: hashedPassword,
     });
-    await this.usersRepository.save(user);
+    try {
+      await this.usersRepository.save(user);
+    } catch (error) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     const payload = { sub: user.id, email: user.email };
-    const access_token = await this.jwtService.signAsync(payload);
+    let access_token;
+    try {
+      access_token = await this.jwtService.signAsync(payload);
+    } catch (error) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     return {
       message: 'User register',
       data: user,
@@ -37,14 +66,38 @@ export class UserService {
   }
 
   async logIn(body: LogInUserDto): Promise<Response> {
-    const user = await this.usersRepository.findOne({
-      where: { email: body.email },
-    });
+    let user;
+    try {
+      user = await this.usersRepository.findOne({
+        where: { email: body.email },
+      });
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     if (user) {
-      const isMatch = await bcrypt.compare(body.password, user?.password);
+      let isMatch;
+      try {
+        isMatch = await bcrypt.compare(body.password, user?.password);
+      } catch (err) {
+        return {
+          message: 'Somthing went wrong please try again later',
+          status: 422,
+        };
+      }
       if (isMatch) {
         const payload = { sub: user.id, email: user.email };
-        const access_token = await this.jwtService.signAsync(payload);
+        let access_token;
+        try {
+          access_token = await this.jwtService.signAsync(payload);
+        } catch (err) {
+          return {
+            message: 'Somthing went wrong please try again later',
+            status: 422,
+          };
+        }
         return {
           message: 'Welcome Back',
           data: user,
@@ -60,7 +113,15 @@ export class UserService {
     throw new HttpException('EMAIL NOT FOUND', HttpStatus.UNPROCESSABLE_ENTITY);
   }
   async findAll(): Promise<Response> {
-    const users = await this.usersRepository.find();
+    let users;
+    try {
+      users = await this.usersRepository.find();
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     return {
       data: users,
       message: 'All USERS',
