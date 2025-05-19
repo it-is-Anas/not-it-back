@@ -18,7 +18,14 @@ export class NoteService {
       content: body.content,
       user: user,
     });
-    await this.noteRepository.save(note);
+    try {
+      await this.noteRepository.save(note);
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     return {
       message: 'New Note Created!',
       data: note,
@@ -27,10 +34,18 @@ export class NoteService {
   }
 
   async getMyNotes(user): Promise<Response> {
-    const notes = await this.noteRepository.find({
-      where: { user: user }, // Use the user object directly
-      relations: ['user'], // Optionally include user details if needed
-    });
+    let notes;
+    try {
+      notes = await this.noteRepository.find({
+        where: { user: user }, // Use the user object directly
+        relations: ['user'], // Optionally include user details if needed
+      });
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     return {
       data: notes,
       status: 200,
@@ -39,10 +54,18 @@ export class NoteService {
   }
 
   async updateNote(id: number, body: CreateNoteDto, user): Promise<Response> {
-    const note = await this.noteRepository.findOne({
-      where: { id },
-      relations: ['user'],
-    });
+    let note;
+    try {
+      note = await this.noteRepository.findOne({
+        where: { id },
+        relations: ['user'],
+      });
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     if (!note) {
       throw new Error(`Note with id ${id} not found`);
     }
@@ -55,7 +78,14 @@ export class NoteService {
 
     if (body.title !== undefined) note.title = body.title;
     if (body.content !== undefined) note.content = body.content;
-    await this.noteRepository.save(note);
+    try {
+      await this.noteRepository.save(note);
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     return {
       message: 'Updated successfull!',
       data: note,
@@ -64,10 +94,18 @@ export class NoteService {
   }
 
   async deleteNote(id, user): Promise<Response> {
-    const note = await this.noteRepository.findOne({
-      where: { id },
-      relations: ['user'],
-    });
+    let note;
+    try {
+      note = await this.noteRepository.findOne({
+        where: { id },
+        relations: ['user'],
+      });
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     if (!note) {
       throw new Error(`Note with id ${id} not found`);
     }
@@ -78,7 +116,15 @@ export class NoteService {
       };
     }
 
-    const deletedNote = await this.noteRepository.remove(note);
+    let deletedNote;
+    try {
+      deletedNote = await this.noteRepository.remove(note);
+    } catch (err) {
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
 
     return {
       message: 'Note Has been deleted !',
