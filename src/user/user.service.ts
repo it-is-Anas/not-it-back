@@ -12,12 +12,28 @@ import { Response } from '../Types/Response';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
+    @InjectRepository(User) 
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
   async register(body: CreateUserDto): Promise<Response> {
     const { firstName, lastName, email, password } = body;
+    try{
+      const checkEmail = await this.usersRepository.findOne({
+        where: { email  },
+      });
+      if(!!checkEmail){
+        return {
+          message: 'Email is already exisit',
+          status: 422,
+        }
+      }
+    }catch(error){
+      return {
+        message: 'Somthing went wrong please try again later',
+        status: 422,
+      };
+    }
     let hashedPassword;
     try {
       hashedPassword = await bcrypt.hash(password, 10);
