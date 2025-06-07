@@ -36,10 +36,14 @@ export class NoteService {
   async getMyNotes(user): Promise<Response> {
     let notes;
     try {
-      notes = await this.noteRepository.find({
-        where: { user: user }, // Use the user object directly
-        relations: ['user'], // Optionally include user details if needed
-      });
+      // notes = await this.noteRepository.find({
+      //   where: { user: user }, // Use the user object directly
+      //   relations: ['user'], // Optionally include user details if needed
+      // });
+      notes = await this.noteRepository.query(
+        'SELECT * FROM note WHERE userId = ? ORDER BY id DESC', // MySQL uses ? for placeholders
+        [user.id],
+      );
     } catch (err) {
       return {
         message: 'Somthing went wrong please try again later',

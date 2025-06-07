@@ -12,23 +12,23 @@ import { Response } from '../Types/Response';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) 
+    @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
   async register(body: CreateUserDto): Promise<Response> {
     const { firstName, lastName, email, password } = body;
-    try{
+    try {
       const checkEmail = await this.usersRepository.findOne({
-        where: { email  },
+        where: { email },
       });
-      if(!!checkEmail){
+      if (!!checkEmail) {
         return {
           message: 'Email is already exisit',
           status: 422,
-        }
+        };
       }
-    }catch(error){
+    } catch (error) {
       return {
         message: 'Somthing went wrong please try again later',
         status: 422,
@@ -64,7 +64,7 @@ export class UserService {
       };
     }
     const payload = { sub: user.id, email: user.email };
-    let access_token;
+    let access_token: string = '';
     try {
       access_token = await this.jwtService.signAsync(payload);
     } catch (error) {
